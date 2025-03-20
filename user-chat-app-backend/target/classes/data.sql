@@ -1,0 +1,29 @@
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Chats (
+    id SERIAL PRIMARY KEY,
+    user1_id INT REFERENCES Users(id) ON DELETE CASCADE,
+    user2_id INT REFERENCES Users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Messages (
+    id SERIAL PRIMARY KEY,
+    chat_id INT REFERENCES Chats(id) ON DELETE CASCADE,
+    sender_id INT REFERENCES Users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE Unread_Messages (
+    user_id INT REFERENCES Users(id) ON DELETE CASCADE,
+    chat_id INT REFERENCES Chats(id) ON DELETE CASCADE,
+    unread_count INT DEFAULT 0,
+    PRIMARY KEY (user_id, chat_id)
+);
