@@ -27,4 +27,4 @@ A real-time chat application built with Spring Boot, Spring Security, and WebSoc
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/chat-app.git
+   git clone https://github.com/manidixit16/user-chat-app-backend
