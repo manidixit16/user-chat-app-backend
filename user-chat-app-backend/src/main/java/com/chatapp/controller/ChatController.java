@@ -1,28 +1,56 @@
 package com.chatapp.controller;
 
-import com.chatapp.dto.ChatRequest;  // Import the ChatRequest class
-import com.chatapp.services.*;  // Import the ChatService class
-import com.chatapp.model.Chat;
+import com.chatapp.model.Message;
+import com.chatapp.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chats")
 public class ChatController {
 
     @Autowired
-    private ChatService chatService;
+    private MessageService messageService;
 
-    @PostMapping
-    public ResponseEntity<?> createChat(@RequestBody ChatRequest chatRequest) {
-        Chat chat = chatService.createChat(chatRequest.getUser1Id(), chatRequest.getUser2Id());
-        return ResponseEntity.ok(chat);
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate; // For WebSocket messaging
+
+    /**
+     * WebSocket endpoint to send a message.
+     *
+     * @param message The message to send.
+     * @return The saved message.
+     */
+    @MessageMapping("/chat.sendMessage")
+    @SendTo("/topic/messages")
+    public Message sendMessage(Message message) {
+        // Save the message to the database
+        Message savedMessage = messageService.sendMessage(
+            message.getChatId(),
+            message.getSender().getId(),
+            message.getContent()
+        );
+
+        // Broadcast the message to all subscribers of /topic/messages
+        messagingTemplate.convertAndSend("/topic/messages", savedMessage);
+
+        return savedMessage;
     }
 
-    @DeleteMapping("/{chatId}")
-    public ResponseEntity<?> deleteChat(@PathVariable Long chatId) {
-        chatService.deleteChat(chatId);
-        return ResponseEntity.ok("Chat deleted successfully");
+    /**
+     * REST endpoint to retrieve messages in a chat.
+     *
+     * @param chatId The ID of the chat.
+     * @param userId The ID of the user.
+     * @return The list of messages in the chat.
+     */
+    @GetMapping("/{chatId}/messages")
+    public List<Message> getMessages(@PathVariable Long chatId, @RequestParam Long userId) {
+        return messageService.getMessages(chatId, userId);
     }
 }

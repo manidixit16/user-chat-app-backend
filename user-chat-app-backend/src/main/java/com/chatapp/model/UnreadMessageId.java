@@ -7,28 +7,19 @@ import java.util.Objects;
 @Embeddable
 public class UnreadMessageId implements Serializable {
 
-    private Long userId;
-    private Long chatId;
+    private Long chatId; // ID of the chat
+    private Long userId; // ID of the user
 
     // Default constructor (required by JPA)
-    public UnreadMessageId() {
-    }
+    public UnreadMessageId() {}
 
-    // Parameterized constructor for easier object creation
-    public UnreadMessageId(Long userId, Long chatId) {
-        this.userId = userId;
+    // Parameterized constructor
+    public UnreadMessageId(Long chatId, Long userId) {
         this.chatId = chatId;
+        this.userId = userId;
     }
 
     // Getters and Setters
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     public Long getChatId() {
         return chatId;
     }
@@ -37,26 +28,25 @@ public class UnreadMessageId implements Serializable {
         this.chatId = chatId;
     }
 
-    // Equals and HashCode methods (required for composite keys)
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    // Override equals and hashCode for composite key
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnreadMessageId that = (UnreadMessageId) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(chatId, that.chatId);
+        return Objects.equals(chatId, that.chatId) && Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, chatId);
-    }
-
-    // toString method for debugging and logging
-    @Override
-    public String toString() {
-        return "UnreadMessageId{" +
-                "userId=" + userId +
-                ", chatId=" + chatId +
-                '}';
+        return Objects.hash(chatId, userId);
     }
 }
